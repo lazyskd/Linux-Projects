@@ -1,0 +1,51 @@
+Objective of the project:
+
+1. Read the Usernames from the Users.txt file
+2. Create accounts for them automatically 
+3. Sets default password and force them to change the password after they login for the first time
+
+Commands I Used:
+
+1. touch userOnboarding.sh => to create the shell script
+2. chmod 764 userOnboading.sh => to set permissions to read write execute for owner and read write for group and only read for otehres 
+3. Vi userOnboarding.sh => to write into the file and press "i" to go into write mode
+
+Script:
+
+#! /bin/bash
+
+#fileapath
+usersFile = "users.txt" #file name
+
+#Default pass
+defPassword = "changeme@123" #defaultpassword
+
+
+
+if [! -f $userFile]; then #testing if the file exist in the location or not. More like "!test -f $userFile" 
+        echo "ERROR: users.txt does not exist"
+        exit 1
+fi
+
+while IFS= read -r USER; do # if we set IFS=  ,it reads the file by new line instead of space separated value and reading the file and set the user in the variable USER
+        if id "$USER" &> /dev/null; then #id "$USER" gives the details of the user or not and feeding that to the blackhole /dev/null is just confirming if the user exist or not if there is no user present it will return false
+                echo "User already exists so skipping"
+        else
+
+                #create user with home directoy
+                useradd -m "$USER"
+
+                #setdefault pass
+                echo "$USER:$defPassword" | chpasswd #chpasswd takes username:password as the parameter so we just piping them to set password
+
+                #force user to change pass after they login
+                chage -d 0 "$USER" #chage is the command to check the age of the password so -d is the last modified date and 0 flag means expired so the user will have to change the password to proceed 
+
+                echo "User: $USER created successfully"
+
+        fi
+
+done < "$usersFile"
+
+
+Happy Learning!
